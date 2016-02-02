@@ -1,0 +1,2 @@
+This python scipt requires two libraries, mutagen and pillow.
+Recommended way to install these libraries is with pip.
