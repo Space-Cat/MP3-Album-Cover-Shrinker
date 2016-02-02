@@ -1,2 +1,10 @@
-This python scipt requires two libraries, mutagen and pillow.
-Recommended way to install these libraries is with pip.
+This python scipt accepts one argument, a root folder containing your entire music library.
+The only supported audio file type is mp3.
+For each file this script will reduce the dimensions of the album cover and apply JPEG compression.
+This can significantly reduce the size of a large music library.
+
+Required modules:
+  mutagen
+  pillow
+  
+Pip is the best option for installing dependencies
