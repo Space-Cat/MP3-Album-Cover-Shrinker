@@ -11,25 +11,10 @@ MaxImageSize = 150000
 #Pixels
 MaxImageDimension = 500
 
-
-def RemoveBloatText(path):
-	openSqrBrkt = path.find('[')
-	closeSqrBrkt = path.rfind(']')
-	if openSqrBrkt > -1 and closeSqrBrkt > openSqrBrkt:
-		newPath = path[:openSqrBrkt] + path[closeSqrBrkt+1:]
-		os.rename(path, newPath)
-		print "Renamed: "
-		print path
-		print "to"
-		print newPath
-		return newPath
-	else:
-		return path
-
+verbose = True
 
 #Returns a io.BytesIO object containing the image data
 def DownSizeImage(bytesIO, JpgQuality=90):
-	print "Downsizing"
 	img = Image.open(bytesIO)
 	w = img.size[0]
 	h = img.size[1]
@@ -47,6 +32,8 @@ def DownSizeImage(bytesIO, JpgQuality=90):
 #Parse an audio file
 def ParseFile(filePath, dontPrint=''):
 	if filePath.endswith('mp3'):
+		if verbose:
+			print "Parsing File: " + filePath
 		audioFile = MP3(filePath, ID3=ID3)
 		for tag in audioFile:
 			if tag.find('APIC') > -1:
@@ -61,7 +48,7 @@ def ParseFile(filePath, dontPrint=''):
 				imgData = audioFile[tag].data
 				imgDataLen = len(imgData)
 				if imgDataLen > MaxImageSize:
-					print "\t Parsing file: " + filePath.replace(dontPrint, '')
+					print "\t Shrinking file: " + filePath.replace(dontPrint, '')
 					imgBytesIO = io.BytesIO(imgData)
 					newImgBytesIO = DownSizeImage(imgBytesIO)
 					audioFile.tags.delall('APIC')
@@ -81,8 +68,8 @@ def ParseFolder(folder):
 	if folder.endswith("/") == False:
 		folder += "/"
 	if os.path.isdir(folder):
-		folder = RemoveBloatText(folder)
-		print "Parsing folder: " + folder
+		if verbose:
+			print "Parsing folder: " + folder
 		folderContents = os.listdir(folder)
 		for item in folderContents:
 			itemPath = folder + item
@@ -90,14 +77,28 @@ def ParseFolder(folder):
 				ParseFile(itemPath, folder)
 			else:
 				ParseFolder(itemPath)
-arg1 = ""
 
-#Set arg1, if no arguments were passed set to the cwd
-if len(sys.argv) >= 2:
-	arg1 = sys.argv[1]
-else:
-	arg1 = os.getcwd()
+def Main():
+	targetFolder = os.getcwd()
+	jpegQuality = 90
+	imageWidth = 500
+	maxImageSize = 150000
 
-print "Using dir: " + arg1
+	argCount = len(sys.argv)
 
-ParseFolder(arg1)
+	if argCount >= 2:
+		targetFolder = sys.argv[1]
+	if argCount >= 3:
+		jpegQuality = sys.argv[2]
+	if argCount >= 4:
+		imageWidth = sys.argv[3]
+	if argCount >= 5:
+		maxImageSize = sys.argv[4]
+	if argCount >= 6:
+		maxImageSize = sys.argv[5]
+	
+	print "Target folder: " + targetFolder
+	
+	ParseFolder(targetFolder)
+	
+Main()
